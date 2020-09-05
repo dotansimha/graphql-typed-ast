@@ -1,0 +1,15 @@
+{
+  "name": "graphql-typed-ast",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:dotansimha/graphql-typed-ast.git",
+  "author": "Dotan Simha <dotansimha@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "graphql": "15.3.0",
+    "typescript": "https://typescript.visualstudio.com/cf7ac146-d525-443c-b23c-0d58337efebc/_apis/build/builds/83806/artifacts?artifactName=tgz&fileId=AFC60CCD5AEE4CC19D6C15D9044564BC4E2AEA5FE84FC89B8DB3C2386C10DB0202&fileName=/typescript-4.1.0-insiders.20200831.tgz"
+  }
+}
