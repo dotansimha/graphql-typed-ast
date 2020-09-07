@@ -18,7 +18,7 @@ The goal of this experiment is to allow this:
 
 ```ts
 const ast = `
-       type Query { user(id: ID!( User! }
+       type Query { user(id: ID!): User! }
        type User { id: ID!, name: String! }
     `;
 
