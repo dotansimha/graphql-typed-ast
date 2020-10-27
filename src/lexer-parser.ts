@@ -1,20 +1,16 @@
-import { TokenKind } from "graphql";
+import {
+  Whitespace,
+  ValidToken,
+  CommentToken,
+  Letter,
+  LineBreak,
+  Tokens,
+  EndOfIdentifier,
+  StringBlock,
+  StringLine,
+} from "./utils";
 
-type Tokens = typeof TokenKind;
-type ValidToken = keyof Tokens;
-type LineBreak = "\r" | "\n";
-type Whitespace = " " | "\t" | LineBreak;
-type EndOfIdentifier = Whitespace | "," | ":" | "!";
-type LowerAlphabet = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
-type UpperAlphabet = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
-type Alphabet = LowerAlphabet | UpperAlphabet
-type Digit = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "0"
-type Letter = Alphabet | Digit | '_';
-type StringLine = "\"";
-type StringBlock = "\"\"\"";
-type CommentToken = "#";
-
-type Token<Type extends ValidToken, Value extends string | undefined = undefined> = {
+export type Token<Type extends ValidToken, Value extends string | undefined = undefined> = {
   type: Type;
   value?: Value;
 }
