@@ -6,13 +6,19 @@ This repo is for experimental TypeScript type-system based parser for GraphQL, f
 
 It uses a custom alpha version of TypeScript from [this PR](https://github.com/microsoft/TypeScript/pull/40336).
 
+## Goals
+
+- [x] GraphQL Lexer 
+- [ ] GraphQL Document Parser
+
+
 ## Example
 
 The goal of this experiment is to allow this:
 
 ```ts
 const ast = `
-       type Query { user(id: ID!( User! }
+       type Query { user(id: ID!): User! }
        type User { id: ID!, name: String! }
     `;
 
