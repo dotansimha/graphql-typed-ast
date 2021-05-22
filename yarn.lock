@@ -7,7 +7,7 @@ graphql@15.3.0:
   resolved "https://registry.npmjs.org/graphql/-/graphql-15.3.0.tgz#3ad2b0caab0d110e3be4a5a9b2aa281e362b5278"
   integrity sha512-GTCJtzJmkFLWRfFJuoo9RWWa/FfamUHgiFosxi/X1Ani4AVWbeyBenZTNX6dM+7WSbbFfTo/25eh0LLkwHMw2w==
 
-typescript@^4.1.0-dev.20200910:
+typescript@4.1.0-dev.20200910:
   version "4.1.0-dev.20200910"
-  resolved "https://registry.npmjs.org/typescript/-/typescript-4.1.0-dev.20200910.tgz#7c34aa390599890e24929db1d8193e31004a601e"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.1.0-dev.20200910.tgz#7c34aa390599890e24929db1d8193e31004a601e"
   integrity sha512-XF+ZdED3gG6rTrt8TDzMiZvbdMsgZgifI/RNS/kZtpuXJViKxrpUw5WtukKG0XBhm+YtCw3hDhlq3hKdi8SzUg==
