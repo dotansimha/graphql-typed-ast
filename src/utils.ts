@@ -1,46 +1,138 @@
-import { TokenKind } from "graphql";
+import { GraphQLResolveInfo, KindEnum } from "graphql";
 
-export type Tokens = typeof TokenKind;
-export type ValidToken = keyof Tokens;
+export type TypedResolverFn<
+  Parent = unknown,
+  Args extends Record<string, any> = {},
+  Context = unknown,
+  Info extends GraphQLResolveInfo = GraphQLResolveInfo,
+  Result = unknown
+> = (
+  parent: Parent,
+  args: Args,
+  context: Context,
+  info: Info
+) => Result | Promise<Result>;
 
-export type LineBreak = "\r" | "\n";
-export type Whitespace = " " | "\t" | LineBreak;
-export type EndOfIdentifier = Whitespace | "," | ":" | "!";
-export type LowerAlphabet = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
-export type UpperAlphabet = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
-export type Alphabet = LowerAlphabet | UpperAlphabet
-export type Digit = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "0"
-export type Letter = Alphabet | Digit | '_';
-export type StringLine = "\"";
-export type StringBlock = "\"\"\"";
-export type CommentToken = "#";
-export type Merge<T> = { [K in keyof T]: T[K] }
+declare global {
+  interface ScalarsOutput {
+    String: string;
+    Boolean: boolean;
+    Int: number;
+    Float: number;
+    ID: string | number;
+  }
 
-export type Keywords = {
-  TYPE: "type",
-  INTERFACE: "interface",
-  UNION: "union",
-  ENUM: "enum",
-  SCALAR: "scalar"
+  interface ScalarsInputs {
+    String: string;
+    Boolean: boolean;
+    Int: number;
+    Float: number;
+    ID: string | number;
+  }
+
+  interface TypeMapping {}
 }
 
-type ReplaceAll<Search extends string, Replace extends string, Subject extends string> =
-  "" extends Subject ? Subject :
-  Subject extends "" ? "" :
-  Subject extends `${infer L}${Search}${infer R}` ? ReplaceAll<Search, Replace, `${L}${Replace}${R}`> :
-  Subject
+export type ParserError<T extends string> = { error: true } & T;
 
-export type TrimLeft<T extends string> =
-    T extends `${' ' | '\n'}${infer R}`
-    ? TrimLeft<R>
-    : T
+type Split<S extends string, D extends string> = string extends S
+  ? string[]
+  : S extends ""
+  ? []
+  : S extends `${infer T}${D}${infer U}`
+  ? [T, ...Split<U, D>]
+  : [S];
 
-export type TrimRight<T extends string> =
-T extends `${infer R}${' ' | '\n'}`
-? TrimRight<R>
-: T
+export type TakeLast<V> = V extends []
+  ? never
+  : V extends [string]
+  ? V[0]
+  : V extends [string, ...infer R]
+  ? TakeLast<R>
+  : never;
 
-export type Trim<T extends string> =
-TrimLeft<T> extends `${infer R}`
-? TrimRight<R>
-: T
+export type TrimLeft<V extends string> = V extends ` ${infer R}`
+  ? TrimLeft<R>
+  : V;
+
+export type TrimRight<V extends string> = V extends `${infer R} `
+  ? TrimRight<R>
+  : V;
+
+export type EatWhitespace<State extends string> = string extends State
+  ? ParserError<"EatWhitespace got generic string type">
+  : State extends ` ${infer State}` | `\n${infer State}`
+  ? EatWhitespace<State>
+  : State;
+
+export type Trim<V extends string> = TrimLeft<TrimRight<V>>;
+
+export type IsEmptyArray<V> = V extends [] ? true : false;
+export type IsArray<V> = V extends [] ? true : false;
+export type IsObject<V> = V extends {} ? true : false;
+export type IsString<V> = V extends string ? true : false;
+
+export type Join<T extends unknown[], D extends string = ""> = T extends []
+  ? ""
+  : T extends [string]
+  ? `${T[0]}`
+  : T extends [string, ...infer U]
+  ? `${T[0]}${D}${Join<U, D>}`
+  : string;
+
+type NonNullable<T> = Exclude<T, null | undefined | void>;
+
+type MapOutputType<Name extends keyof ScalarsOutput | string> =
+  Name extends keyof TypeMapping
+    ? TypeMapping[Name]
+    : Name extends keyof ScalarsOutput
+    ? ScalarsOutput[Name]
+    : unknown;
+
+type MapInputType<Name extends keyof ScalarsInputs | string> =
+  Name extends keyof TypeMapping
+    ? TypeMapping[Name]
+    : Name extends keyof ScalarsOutput
+    ? ScalarsOutput[Name]
+    : unknown;
+
+type BaseType<T extends string> = T extends `${infer U}!`
+  ? BaseType<U>
+  : T extends `[${infer U}]`
+  ? BaseType<U>
+  : T;
+
+type ApplyModifiers<T extends string, OutputType> = T extends `${infer U}!`
+  ? NonNullable<ApplyModifiers<U, OutputType>>
+  : T extends `[${infer U}]`
+  ? Array<ApplyModifiers<U, OutputType>>
+  : OutputType | null | undefined | void;
+
+type ParseTypeInfo<T extends string> = {
+  raw: T;
+  outputType: ApplyModifiers<T, MapOutputType<BaseType<T>>>;
+};
+
+type ParseFieldArguments<FieldDefSDL extends string | string[]> =
+  FieldDefSDL extends string[]
+    ? []
+    : FieldDefSDL extends `${infer FieldName}(${infer FieldArgs})`
+    ? ParseFieldArguments<Split<FieldArgs, ",">>
+    : {};
+
+export type FieldResolver<FieldSDL extends string> = EatWhitespace<
+  Trim<FieldSDL>
+> extends `${infer FieldDef}: ${infer FieldResult}`
+  ? TypedResolverFn<
+      never,
+      ParseFieldArguments<FieldSDL>,
+      {},
+      GraphQLResolveInfo,
+      ParseTypeInfo<FieldResult>["outputType"]
+    >
+  : Error<"Failed to parse field resolver", EatWhitespace<Trim<FieldSDL>>>;
+
+type Error<Message extends string, Raw> = {
+  error: Message;
+  raw: Raw;
+};
